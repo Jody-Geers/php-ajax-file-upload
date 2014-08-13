@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>Upload and Parse CSV</title>
+	
+	<link rel="stylesheet" type="text/css" media="all" href="styles.css" />
+</head>
+<body>
+	
+	<div id="app">
+	
+		<form id="upload" action="/modules/file-upload/" method="POST" enctype="multipart/form-data">
+		
+			<fieldset>
+			<legend>CSV File Upload</legend>
+				
+				<div id="upload-file-selector">
+					<button type="button" onclick="selectFile();">Select Files</button>
+				</div>
+				
+				<div class="display-none">
+					<input id="select-file" type="file" name="file" onchange="fileSelected( this );" />
+				</div>
+				
+				<div class="display-none" id="upload-submit">
+					<button type="submit">Upload Files</button>
+				</div>				
+				
+			</fieldset>
+		
+		</form>
+	
+	</div>
+
+</body>
+<script>
+
+/**
+ * Helper to get el
+ */
+function $( id ) {
+	
+	return document.getElementById( id );
+	
+}
+
+/**
+ * Choose file to select
+ */
+function selectFile() {
+
+	$( 'select-file' ).click();
+	
+}
+
+/**
+ * File selection made
+ * @param {el} - ctx element
+ */
+function fileSelected( el ) {
+
+	var file = el.value;
+	var fileName = file.split( '\\' );
+	
+	$( 'upload-file-selector' ).innerHTML += fileName[fileName.length-1];
+	
+	var reg = new RegExp( '(\\s|^)' + 'display-none' + '(\\s|$)' );
+		$( 'upload-submit' ).className = $( 'upload-submit' ).className.replace( reg, '' );
+	
+}
+
+</script>
+</html>
