@@ -5,24 +5,16 @@ class FileUpload {
 	// relative to current location
 	const UPLOAD_DIR = '../../uploads/';
 	
-	private $_fileName = null;
-	private $_fileTempName = null;
-	private $_fileSizeBytes = null;
-	private $_fileType = null;
-	private $_fileUploadError = null;
+	private $_file = null;
 
 	/**
 	 * File Upload Handler.
 	 * @return {Object} fileUpload
 	 * @access public
 	 */
-	public function FileUpload( $argsArr ) {
+	public function FileUpload( $argsObj ) {
 		
-		$this->_fileName = $argsArr['fileName'];
-		$this->_fileType = $argsArr['fileType'];
-		$this->_fileSizeBytes = $argsArr['fileSizeBytes'];
-		$this->_fileTempName = $argsArr['fileTempName'];
-		$this->_fileUploadError = $argsArr['fileUploadError'];
+		$this->_file = $argsObj;
 		
 	}
 	
@@ -33,9 +25,9 @@ class FileUpload {
 	 */
 	private function _isFileUploadedSucessfully() {
 		
-		if ( $this->_fileUploadError > 0 ) {
+		if ( $this->_file->fileUploadError > 0 ) {
 		
-			echo 'File upload failed' . '<br/>';
+			echo 'Error in file upload' . '<br/>';
 		
 			return false;
 		
@@ -52,7 +44,7 @@ class FileUpload {
 	 */
 	private function _isNoDuplicationOfFile() {
 		
-		if ( file_exists( FileUpload::UPLOAD_DIR . $this->_fileName ) ) {
+		if ( file_exists( FileUpload::UPLOAD_DIR . $this->_file->fileName ) ) {
 		
 			echo 'File already exists.' . '<br/>';
 			
@@ -66,19 +58,31 @@ class FileUpload {
 	
 	/**
 	 * Echos out data of sucessful file upload.
+	 * @return {string} - html ui output
 	 * @access private
 	 */
 	private function _successfulOutputUI() {
 		
-		echo '_fileName - ' . $this->_fileName . '<br>';
-		echo '_fileType - ' . $this->_fileType . '<br>';
-		echo '_fileSizeBytes - ' . ( $this->_fileSizeBytes / 1024 ) . ' KB<br>';
-		echo '_fileTempName - ' . $this->_fileTempName . '<br>';
+		$returnUi = '';
+		
+		$returnUi .= '<div class="width-half float-left"><img src="/uploads/' . $this->_file->fileName . '" class="width-whole"/></div>';
+
+		$returnUi .= '<div class="width-half float-left text-center">' 
+				  . 'fileName:' . '<br/>' . $this->_file->fileName . '<br>'
+				  . 'fileType:' . '<br/>' . $this->_file->fileType . '<br>'
+				  . 'fileSizeBytes:' . '<br/>' . ( $this->_file->fileSizeBytes / 1024 ) . ' KB<br>'
+				  . 'fileTempName:' . '<br/>' . $this->_file->fileTempName . '<br>'
+				  . '</div>'
+  		;
+  		
+  		return $returnUi;
 		
 	}
 	
 	/**
 	 * Handles incoming file, saves to ./uploads
+	 * @return {boolean} - false if process fail
+	 * @return {string} - html output if successful
 	 * @access public
 	 */
 	public function handleFileUpload() {
@@ -87,27 +91,19 @@ class FileUpload {
 		if ( !$this->_isFileUploadedSucessfully() ) {
 				
 			echo 'File Upload - failed' . '<br/>';
-			
-			header( 'HTTP/1.1 400 Bad Request', true, 400 );
 				
-			return;
+			return false;
 				
 		}		
 		
 		// Input Validation
-		$fileUploadValidation = new FileUploadValidation( array(
-			'fileName' => $this->_fileName,
-			'fileType' => $this->_fileType,
-			'fileSizeByes' => $this->_fileSizeBytes
-		));
+		$fileUploadValidation = new FileUploadValidation( $this->_file );
 		
 		if ( !$fileUploadValidation->isFileUploadValidationPass() ) {
 			
 			echo 'File Upload Validation - failed' . '<br/>';
 			
-			header( 'HTTP/1.1 400 Bad Request', true, 400 );
-			
-			return;
+			return false;
 			
 		}
 		
@@ -115,18 +111,16 @@ class FileUpload {
 		if ( !$this->_isNoDuplicationOfFile() ) {
 		
 			echo 'File duplication error.' . '<br/>';
-			
-			header( 'HTTP/1.1 400 Bad Request', true, 400 );
 		
-			return;
+			return false;
 		
 		}
 		
 		// Move file to ./uploads
-		move_uploaded_file( $this->_fileTempName, FileUpload::UPLOAD_DIR . $this->_fileName );
+		move_uploaded_file( $this->_file->fileTempName, FileUpload::UPLOAD_DIR . $this->_file->fileName );
 		
 		// Successful output UI
-		$this->_successfulOutputUI();
+		return $this->_successfulOutputUI();
 		
 	}
 	

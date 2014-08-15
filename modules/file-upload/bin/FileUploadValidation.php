@@ -8,24 +8,22 @@ class FileUploadValidation {
 	private $_extension = null;
 	private $_allowedTypeArr = null;
 	
-	private $_incomingFileType = null;
-	private $_incomingFileSize = null;
+	private $_file = null;
 	
 	/**
 	 * Validation functionality for file upload.
 	 * @return {Object} fileUploadValidation
 	 * @access public
 	 */
-	public function FileUploadValidation( $argsArr ) {
+	public function FileUploadValidation( $argsObj ) {
+		
+		$this->_file = $argsObj;
 
 		$this->_allowedExtsArr = array( 'gif', 'jpeg', 'jpg', 'png' );
-		$temp = explode( '.', $argsArr['fileName'] );
+		$temp = explode( '.', $this->_file->fileName );
 		$this->_extension = end( $temp );
 		
 		$this->_allowedTypeArr = array( 'image/gif', 'image/jpeg', 'image/jpg', 'image/pjpeg', 'image/x-png', 'image/png' );
-		
-		$this->_incomingFileType = $argsArr['fileType'];
-		$this->_incomingFileSize = $argsArr['fileSizeByes'];
 		
 	}
 
@@ -55,7 +53,7 @@ class FileUploadValidation {
 	 */
 	private function _isValidFileType() {
 		
-		if ( !in_array( $this->_incomingFileType, $this->_allowedTypeArr ) ) {
+		if ( !in_array( $this->_file->fileType, $this->_allowedTypeArr ) ) {
 		
 			echo 'Invalid file type' . '<br/>';
 		
@@ -74,7 +72,7 @@ class FileUploadValidation {
 	 */
 	private function _isValidFileSize() {
 	
-		if ( $this->_incomingFileSize > FileUploadValidation::MAX_FILE_SIZE_BYTES ) {
+		if ( $this->_file->fileSizeBytes > FileUploadValidation::MAX_FILE_SIZE_BYTES ) {
 			
 			echo 'Invalid file size' . '<br/>';
 		

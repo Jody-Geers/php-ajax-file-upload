@@ -2,6 +2,8 @@
 
 class Main {
 	
+	private $_file = null;
+	
 	/**
 	 * Application.
 	 * @return {Object} main
@@ -10,8 +12,18 @@ class Main {
 	public function Main() {
 
 		// application dependancys
+		require_once( '/bin/File.php' );
 		require_once( '/bin/FileUpload.php' );
 		require_once( '/bin/FileUploadValidation.php' );
+		
+		// incoming file
+		$this->_file = new File( array(
+			'fileName' => $_FILES['file']['name'],
+			'fileType' => $_FILES['file']['type'],
+			'fileSizeBytes' => $_FILES['file']['size'],
+			'fileTempName' => $_FILES['file']['tmp_name'],
+			'fileUploadError' => $_FILES['file']['error']
+		));
 		
 	}
 
@@ -21,31 +33,23 @@ class Main {
 	 */
 	public function init() {
 		
-		if ( $_FILES ) {
-			
-			// accept file transfer
-			$fileUpload = new FileUpload( array(
-				'fileName' => $_FILES['file']['name'],
-				'fileType' => $_FILES['file']['type'],
-				'fileSizeBytes' => $_FILES['file']['size'],
-				'fileTempName' => $_FILES['file']['tmp_name'],
-				'fileUploadError' => $_FILES['file']['error']
-			));
-			
-			$fileUpload->handleFileUpload();
-			
-			return;
 		
-		} else {
+		// accept file transfer
+		$fileUpload = new FileUpload( $this->_file );
+		
+		$returnUi = $fileUpload->handleFileUpload();
+		
+		if ( !$returnUi ) {
 			
-			// decline invalid request
-			echo 'Invalid request type' . '<br/>';
+			// file upload failed
+			echo 'Failed file upload' . '<br/>';
 			
 			header( 'HTTP/1.1 400 Bad Request', true, 400 );
 			
-			return;
-			
 		}
+		
+		// process successful return UI
+		echo $returnUi;
 		
 	}
 	
@@ -54,7 +58,21 @@ class Main {
 /**
  * Start Application
  */
-$main = new Main();
-	$main->init();
+if ( !$_FILES ) {
+		
+	// decline invalid request
+	echo 'Invalid request type' . '<br/>';
+
+	header( 'HTTP/1.1 400 Bad Request', true, 400 );
+
+	return false;
+	
+} else {
+
+	// bring the noise!
+	$main = new Main();
+		$main->init();
+	
+}
 
 ?>
