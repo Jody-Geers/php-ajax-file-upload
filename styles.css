@@ -46,6 +46,22 @@ button:focus {
 	display: none;
 }
 
+.width-whole {
+	width: 100%;
+}
+
+.width-half {
+	width: 50%;
+}
+
+.float-left {
+	float: left;
+}
+
+.text-center {
+	text-align: center;
+}
+
 /*
 *	Main Content Wrapper
 */
@@ -55,4 +71,11 @@ button:focus {
 	max-width: 1080px;
 	margin: 0 auto;
 	
+}
+
+/*
+*	Output UI
+*/
+#app #output {
+	padding-top: 25px;
 }
