@@ -46,7 +46,7 @@ button:focus {
 	display: none;
 }
 
-.width-whole {
+.width-whole, .width-100 {
 	width: 100%;
 }
 
@@ -78,4 +78,33 @@ button:focus {
 */
 #app #output {
 	padding-top: 25px;
+}
+
+/*
+*	Drag and drop image area
+*/
+#app #upload-file-dragdrop {
+	
+	border: 1px dashed #6C6C6C;
+	color: #6C6C6C;
+	font-size: 0.75em;
+	text-align: center;
+	width: 50%;
+	margin: 2px 0px 0px 20px;
+	padding: 5px 30px;
+	
+}
+#app #upload-file-dragdrop.hover {
+	
+	border: 1px dashed #F3F3F3;
+	color: #F3F3F3;
+	
+}
+
+/*
+*	Ajax image loading
+*/
+#app #upload-loading {
+	text-align: center;
+	padding-top: 10px;
 }
