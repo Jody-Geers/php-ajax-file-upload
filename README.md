@@ -1,6 +1,6 @@
-# php-file-upload
+# php-ajax-file-upload
 
-  Accepts image file from DOM, Sends to server, Server Validates, Saves, Returns UI.
+  Accepts image file from DOM, Sends to server via ajax, Server Validates, Saves, Returns UI, updates DOM.
 
 ## Installation
 
