@@ -15,24 +15,34 @@
 			<fieldset>
 			<legend>Image File Upload</legend>
 				
-				<div id="upload-file-selector">
-					<button type="button" onclick="selectFile();">Select Files</button>
+				<div class="float-left width-100">
+					<div id="upload-file-selector" class="float-left">
+						<button type="button" onclick="selectFile();">Select Files</button>
+					</div>
+					
+					<div id="upload-file-dragdrop" class="float-left">
+						or drag and drop image here
+					</div>
 				</div>
 				
 				<div class="display-none">
 					<input id="upload-select-file" type="file" name="file" onchange="fileSelected( this );" />
 				</div>
 				
-				<div class="display-none" id="upload-submit">
+				<div class="display-none float-left width-100" id="upload-submit">
 					<button type="submit" id="upload-submit-button">Upload Files</button>
+				</div>
+				
+				<div class="display-none" id="upload-loading">
+					<img src="/bin/ajax-loader.gif" />
+				</div>
+				
+				<div id="upload-file-output">
 				</div>
 				
 			</fieldset>
 		
 		</form>
-	
-		<div id="output">
-		</div>
 	
 	</div>
 
@@ -42,10 +52,15 @@
 // els
 var uploadForm = $( 'upload' ),
 	uploadFileSelector = $( 'upload-file-selector' ),
+	uploadFileDragdrop = $("upload-file-dragdrop"),
 	uploadSelectFile = $( 'upload-select-file' ),
 	uploadSubmit = $( 'upload-submit' ),
 	uploadSubmitBtn = $( 'upload-submit-button' ),
-	regExpDisplayNone = new RegExp( '(\\s|^)' + 'display-none' + '(\\s|$)' )
+	uploadUploading = $( 'upload-loading' ),
+	uploadFileOutput = $( 'upload-file-output' ),
+	regExpDisplayNone = new RegExp( '(\\s|^)' + 'display-none' + '(\\s|$)' ),
+	regExpHover = new RegExp( '(\\s|^)' + 'hover' + '(\\s|$)' ),
+	leFile = null;
 ;
 
 /**
@@ -74,11 +89,12 @@ function fileSelected( el ) {
 
 	// show selected file
 	var file = el.value;
-	var fileName = file.split( '\\' );
+	var fileName = ( el.value.name )? el.value.name : file.split( '\\' );
 	
-	uploadFileSelector.innerHTML += fileName[fileName.length-1];
+	uploadFileSelector.innerHTML += ( fileName[fileName.length-1].length > 1 )? fileName[fileName.length-1] : '' ;
 	
 	// show submit btn 
+	uploadFileDragdrop.className += ' display-none';
 	uploadSubmit.className = uploadSubmit.className.replace( regExpDisplayNone, '' );
 	
 }
@@ -90,28 +106,14 @@ function fileSelected( el ) {
 uploadForm.onsubmit = function( event ) {
 	
 	event.preventDefault();
+	updateUiProcessStart();
 	
 	// Get the selected files from the input.
 	var files = uploadSelectFile.files;
 	
 	// Create a new FormData object.
 	var formData = new FormData();
-	
-	// Loop through each of the selected files. 
-	// TODO: server does not currently accept multiple files.
-	for ( var i = 0; i < files.length; i++ ) {
-		
-		var file = files[i];
-
-		// Check the file type.
-		if ( !file.type.match( 'image.*' ) ) {
-			continue;
-		}
-
-		// Add the file to the request.
-		formData.append( 'file', file, file.name );
-		
-	}
+		formData.append( 'file', files[0], files[0].name );
 	
 	// Set up the request.
 	var xhr = new XMLHttpRequest();
@@ -132,13 +134,81 @@ uploadForm.onsubmit = function( event ) {
 
 /**
 * Updates UI, Removed submit button, shows ajax	
+*/
+function updateUiProcessStart() {
+	
+	uploadSubmitBtn.className += ' display-none';
+	
+	uploadUploading.className = uploadUploading.className.replace( regExpDisplayNone, '' );
+	
+}
+
+/**
+* Updates UI, Removed ajax, shows response	
 * @param {string} - xhr.response
 */
 function updateUiProcessEnd( res ) {
 	
-	$('output').innerHTML = res;
+	uploadFileOutput.innerHTML = res;
+	
+	uploadUploading.className += ' display-none';
+	uploadFileSelector.className += ' display-none';
 	
 }
+
+/**
+* mouse over drag drop area
+* @param {event} - mouseover action
+*/
+function fileDragHover( event ) {
+	
+	event.stopPropagation();
+	event.preventDefault();
+	
+	if ( event.type == 'dragover' ) {
+		
+		if ( !event.target.className.match( regExpHover ) ) event.target.className += ' hover';	
+		
+	} else {
+		
+		event.target.className = event.target.className.replace( regExpHover, '' );
+		
+	}
+	
+}
+
+/**
+* drop file in landing zone
+* @param {event} - drop file
+*/
+function fileSelectHandler( event ) {
+
+	// cancel event and hover styling
+	fileDragHover( event );
+
+	// fetch FileList object
+	var files = event.target.files || event.dataTransfer.files;
+	
+	// process first File object
+	uploadFileSelector.innerHTML += files[0].name;
+	
+	uploadSelectFile.files[0] = files[0];
+	
+	fileSelected({ value: files[0] });
+
+}
+
+/**
+ * Initialize UI
+ */
+(function init() {
+	
+	// file drop
+	uploadFileDragdrop.addEventListener( 'dragover', fileDragHover, false );
+	uploadFileDragdrop.addEventListener( 'dragleave', fileDragHover, false );
+	uploadFileDragdrop.addEventListener( 'drop', fileSelectHandler, false );
+	
+})();
 
 </script>
 </html>
