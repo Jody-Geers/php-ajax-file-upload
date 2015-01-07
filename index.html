@@ -123,8 +123,8 @@ uploadForm.onsubmit = function( event ) {
 	
 	// Set up a handler for when the request finishes.
 	xhr.onload = function () {
-		
-		updateUiProcessEnd( xhr.response );
+
+		updateUiProcessEnd( ( xhr.response )? xhr.response : xhr.status + ' : ' + xhr.statusText );
 		
 	};
 	
